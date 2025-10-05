@@ -193,4 +193,19 @@ All colors MUST be HSL.
   .pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }
+
+  @keyframes blink-red {
+    0%, 100% { 
+      color: hsl(0 72% 51%);
+      opacity: 1;
+    }
+    50% { 
+      color: hsl(0 72% 51%);
+      opacity: 0.3;
+    }
+  }
+
+  .blink-red {
+    animation: blink-red 1s ease-in-out infinite;
+  }
 }

@@ -4,10 +4,21 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX } from "lucide-react";
 
+const formatTempo = (inicio: string) => {
+  const agora = new Date().getTime();
+  const horaInicio = new Date(inicio).getTime();
+  const diffMs = agora - horaInicio;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffSecs = Math.floor((diffMs % 60000) / 1000);
+  return `${diffMins}:${String(diffSecs).padStart(2, '0')}`;
+};
+
 export default function Painel() {
   const [chamando, setChamando] = useState<any[]>([]);
   const [proximas, setProximas] = useState<any[]>([]);
+  const [finalizadas, setFinalizadas] = useState<any[]>([]);
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const [tempos, setTempos] = useState<Record<string, string>>({});
   const prevIdsRef = useRef<string[]>([]);
 
   const beep = () => {
@@ -61,6 +72,7 @@ export default function Painel() {
 
       const chamandoAtual = data?.filter(s => s.status === 'chamando') || [];
       const aguardando = data?.filter(s => s.status === 'aguardando') || [];
+      const finalizadasRecentes = data?.filter(s => s.status === 'atendida').slice(-6) || [];
 
       // Detectar novas senhas chamando
       const newIds = chamandoAtual.map(s => s.id).sort();
@@ -69,6 +81,14 @@ export default function Painel() {
 
       setChamando(chamandoAtual);
       setProximas(aguardando.slice(0, 8));
+      setFinalizadas(finalizadasRecentes);
+
+      // Atualizar tempos
+      const novosTempos: Record<string, string> = {};
+      [...chamandoAtual, ...aguardando, ...finalizadasRecentes].forEach(s => {
+        novosTempos[s.id] = formatTempo(s.hora_retirada);
+      });
+      setTempos(novosTempos);
 
       if (prevIds.length && hasNew && audioEnabled) {
         beep();
@@ -84,7 +104,7 @@ export default function Painel() {
 
   useEffect(() => {
     carregar();
-    const interval = setInterval(carregar, 3000);
+    const interval = setInterval(carregar, 1000); // Atualiza a cada 1s para cronômetro
     const channel = supabase
       .channel('painel-senhas')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'senhas' }, () => {
@@ -109,63 +129,115 @@ export default function Painel() {
   };
 
   return (
-    <div className="min-h-screen gradient-ocean p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold text-white">Painel de Chamadas</h1>
-          <Button
-            onClick={() => setAudioEnabled(!audioEnabled)}
-            variant={audioEnabled ? "default" : "outline"}
-            size="lg"
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-          >
-            {audioEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
-            <span className="ml-2">{audioEnabled ? "Áudio Ativado" : "Ativar Áudio"}</span>
-          </Button>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Vídeo de fundo */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
+        <iframe
+          className="absolute top-1/2 left-1/2 w-[177.77777778vh] h-[56.25vw] min-h-full min-w-full -translate-x-1/2 -translate-y-1/2"
+          src="https://www.youtube.com/embed/_TUU487uR38?autoplay=1&mute=1&loop=1&playlist=_TUU487uR38&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
+          allow="autoplay; encrypted-media"
+          frameBorder="0"
+        />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+
+      {/* Conteúdo */}
+      <div className="relative z-10 min-h-screen flex">
+        {/* Coluna Esquerda - Informações */}
+        <div className="w-full md:w-1/2 p-6 space-y-4 overflow-y-auto">
+          {/* Header com botão discreto */}
+          <div className="flex justify-between items-start">
+            <h1 className="text-3xl md:text-5xl font-bold text-white drop-shadow-lg">
+              Painel de Chamadas
+            </h1>
+            <Button
+              onClick={() => setAudioEnabled(!audioEnabled)}
+              variant="ghost"
+              size="sm"
+              className="bg-black/30 hover:bg-black/50 text-white border-white/20 backdrop-blur-sm"
+            >
+              {audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </Button>
+          </div>
+
+          {/* Senhas Chamando Agora */}
+          <Card className="bg-black/60 backdrop-blur-md border-destructive/50 shadow-elevated">
+            <div className="p-6">
+              <h2 className="text-2xl font-bold mb-4 blink-red">Senhas Chamando Agora</h2>
+              {chamando.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4">
+                  {chamando.map((senha) => (
+                    <div key={senha.id} className="bg-destructive/20 border-2 border-destructive rounded-xl p-4 pulse-glow">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="text-4xl font-bold text-white mb-1">
+                            {getPrefixo(senha.tipo)}{String(senha.numero).padStart(3, "0")}
+                          </div>
+                          <div className="text-lg font-semibold text-white">Guichê {senha.guiche}</div>
+                          <div className="text-sm text-white/80">{senha.atendente}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-mono text-white/90">{tempos[senha.id]}</div>
+                          <div className="text-xs text-white/70">tempo</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-lg text-white/70">Aguardando chamadas...</p>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Próximas Senhas */}
+          <Card className="bg-black/50 backdrop-blur-md border-white/20 shadow-elevated">
+            <div className="p-4">
+              <h2 className="text-xl font-bold mb-3 text-white">Próximas Senhas</h2>
+              {proximas.length > 0 ? (
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                  {proximas.map((senha) => (
+                    <div key={senha.id} className="bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm">
+                      <div className="text-xl font-bold text-white mb-1">
+                        {getPrefixo(senha.tipo)}{String(senha.numero).padStart(3, "0")}
+                      </div>
+                      <div className="text-xs font-mono text-white/70">{tempos[senha.id]}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-white/60">Nenhuma senha aguardando</p>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Senhas Chamadas */}
+          <Card className="bg-black/50 backdrop-blur-md border-white/20 shadow-elevated">
+            <div className="p-4">
+              <h2 className="text-xl font-bold mb-3 text-white">Senhas Chamadas</h2>
+              {finalizadas.length > 0 ? (
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                  {finalizadas.map((senha) => (
+                    <div key={senha.id} className="bg-success/20 border border-success/30 rounded-lg p-3 text-center backdrop-blur-sm">
+                      <div className="text-xl font-bold text-white mb-1">
+                        {getPrefixo(senha.tipo)}{String(senha.numero).padStart(3, "0")}
+                      </div>
+                      <div className="text-xs font-mono text-white/70">{tempos[senha.id]}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-white/60">Nenhuma senha finalizada</p>
+                </div>
+              )}
+            </div>
+          </Card>
         </div>
-
-        {/* Senhas Chamando */}
-        <Card className="p-8 shadow-elevated">
-          <h2 className="text-2xl font-bold mb-6">Senhas Chamando Agora</h2>
-          {chamando.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {chamando.map((senha) => (
-                <div key={senha.id} className="bg-primary/5 border-2 border-primary rounded-xl p-6 text-center pulse-glow">
-                  <div className="text-6xl font-bold text-primary mb-2">
-                    {getPrefixo(senha.tipo)}{String(senha.numero).padStart(3, "0")}
-                  </div>
-                  <div className="text-xl font-semibold mb-1">Guichê {senha.guiche}</div>
-                  <div className="text-sm text-muted-foreground">{senha.atendente}</div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-xl text-muted-foreground">Aguardando chamadas...</p>
-            </div>
-          )}
-        </Card>
-
-        {/* Próximas Senhas */}
-        <Card className="p-8 shadow-elevated">
-          <h2 className="text-2xl font-bold mb-6">Próximas Senhas</h2>
-          {proximas.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-              {proximas.map((senha) => (
-                <div key={senha.id} className="bg-muted rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    {getPrefixo(senha.tipo)}{String(senha.numero).padStart(3, "0")}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">Nenhuma senha aguardando</p>
-            </div>
-          )}
-        </Card>
       </div>
     </div>
   );
