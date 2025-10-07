@@ -8,11 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import SenhaCard from "@/components/SenhaCard";
 import Layout from "@/components/Layout";
 import { Phone, CheckCircle, RotateCcw, X, Users, Star } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Tables } from "@/integrations/supabase/types";
 
 export default function Admin() {
-  const [senhas, setSenhas] = useState<any[]>([]);
+  const [senhas, setSenhas] = useState<Tables<'senhas'>[]>([]);
   const [stats, setStats] = useState({ aguardando: 0, chamando: 0, atendidas: 0 });
-  const [guiche, setGuiche] = useState("");
+  const [guiche, setGuiche] = useState<string | null>(null);
   const [atendente, setAtendente] = useState("");
   const { toast } = useToast();
 
@@ -32,8 +34,14 @@ export default function Admin() {
       const atendidas = data?.filter(s => s.status === 'atendida').length || 0;
       
       setStats({ aguardando, chamando, atendidas });
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Erro ao carregar:", e);
+      const description = e instanceof Error
+        ? e.message
+        : typeof e === "object" && e !== null && "message" in e
+          ? String((e as { message?: unknown }).message)
+          : String(e);
+      toast({ title: "Erro ao carregar", description, variant: "destructive" });
     }
   }
 
@@ -99,12 +107,13 @@ export default function Admin() {
         title: "Senha chamada!",
         description: `Senha ${proxima.numero} chamada.`,
       });
-    } catch (e: any) {
-      toast({
-        title: "Erro ao chamar",
-        description: e.message,
-        variant: "destructive",
-      });
+    } catch (e: unknown) {
+      const description = e instanceof Error
+        ? e.message
+        : typeof e === "object" && e !== null && "message" in e
+          ? String((e as { message?: unknown }).message)
+          : String(e);
+      toast({ title: "Erro ao chamar", description, variant: "destructive" });
     }
   };
 
@@ -124,12 +133,13 @@ export default function Admin() {
         title: "Senha finalizada!",
         description: "Atendimento concluído.",
       });
-    } catch (e: any) {
-      toast({
-        title: "Erro ao finalizar",
-        description: e.message,
-        variant: "destructive",
-      });
+    } catch (e: unknown) {
+      const description = e instanceof Error
+        ? e.message
+        : typeof e === "object" && e !== null && "message" in e
+          ? String((e as { message?: unknown }).message)
+          : String(e);
+      toast({ title: "Erro ao finalizar", description, variant: "destructive" });
     }
   };
 
@@ -151,12 +161,13 @@ export default function Admin() {
         title: "Senha voltou para fila",
         description: "Senha retornou para aguardando.",
       });
-    } catch (e: any) {
-      toast({
-        title: "Erro ao voltar",
-        description: e.message,
-        variant: "destructive",
-      });
+    } catch (e: unknown) {
+      const description = e instanceof Error
+        ? e.message
+        : typeof e === "object" && e !== null && "message" in e
+          ? String((e as { message?: unknown }).message)
+          : String(e);
+      toast({ title: "Erro ao voltar", description, variant: "destructive" });
     }
   };
 
@@ -173,12 +184,13 @@ export default function Admin() {
         title: "Senha cancelada",
         description: "Senha foi cancelada.",
       });
-    } catch (e: any) {
-      toast({
-        title: "Erro ao cancelar",
-        description: e.message,
-        variant: "destructive",
-      });
+    } catch (e: unknown) {
+      const description = e instanceof Error
+        ? e.message
+        : typeof e === "object" && e !== null && "message" in e
+          ? String((e as { message?: unknown }).message)
+          : String(e);
+      toast({ title: "Erro ao cancelar", description, variant: "destructive" });
     }
   };
 
@@ -226,12 +238,23 @@ export default function Admin() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="guiche">Guichê</Label>
-              <Input
-                id="guiche"
-                placeholder="Ex: G01"
-                value={guiche}
-                onChange={(e) => setGuiche(e.target.value)}
-              />
+              <Select value={guiche ?? undefined} onValueChange={(value) => setGuiche(value)}>
+                <SelectTrigger id="guiche" className="w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="6">6</SelectItem>
+                  <SelectItem value="7">7</SelectItem>
+                  <SelectItem value="8">8</SelectItem>
+                  <SelectItem value="9">9</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="atendente">Atendente</Label>

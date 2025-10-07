@@ -33,8 +33,12 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between h-16">
             <div className="flex items-center space-x-8">
               <Link to="/" className="text-xl font-bold text-primary flex items-center gap-2">
-                <Monitor className="w-6 h-6" />
-                Sistema de Chamadas
+                {import.meta.env.VITE_LOGO_URL ? (
+                  <img src={import.meta.env.VITE_LOGO_URL} alt="Logo" className="h-8 w-auto" />
+                ) : (
+                  <Monitor className="w-6 h-6" />
+                )}
+                <span className="hidden sm:inline">Sistema de Chamadas</span>
               </Link>
               <div className="hidden md:flex space-x-4">
                 <Link to="/">

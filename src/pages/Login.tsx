@@ -31,10 +31,11 @@ export default function Login() {
         title: "Login realizado!",
         description: "Bem-vindo ao sistema.",
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Erro desconhecido";
       toast({
         title: "Erro ao fazer login",
-        description: e.message,
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -43,13 +44,17 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen gradient-ocean flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8 shadow-elevated animate-scale-in">
+    <div className={`min-h-screen flex items-center justify-center p-4 ${import.meta.env.VITE_BACKGROUND_IMAGE_URL ? 'bg-cover bg-center' : ''} ${import.meta.env.VITE_BACKGROUND_IMAGE_URL ? 'has-bg-image' : ''}`}>
+      <Card className="w-full max-w-md p-8 shadow-elevated animate-scale-in backdrop-blur-md bg-white/90">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-primary/10 p-4 rounded-full">
-              <Monitor className="w-12 h-12 text-primary" />
-            </div>
+            {import.meta.env.VITE_LOGO_URL ? (
+              <img src={import.meta.env.VITE_LOGO_URL} alt="Logo" className="h-12" />
+            ) : (
+              <div className="bg-primary/10 p-4 rounded-full">
+                <Monitor className="w-12 h-12 text-primary" />
+              </div>
+            )}
           </div>
           <h1 className="text-3xl font-bold mb-2">Sistema de Chamadas</h1>
           <p className="text-muted-foreground">Acesso para equipe</p>
@@ -84,6 +89,11 @@ export default function Login() {
             {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
+
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <button className="text-primary underline" onClick={() => navigate('/reset-password')}>Esqueci minha senha</button>
+          <button className="text-primary underline" onClick={() => navigate('/register')}>Cadastrar-se</button>
+        </div>
 
         <div className="mt-6 text-center">
           <Button variant="ghost" onClick={() => navigate("/")}>

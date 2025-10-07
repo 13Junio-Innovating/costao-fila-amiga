@@ -20,6 +20,7 @@ export default function SenhaCard({ senha }: SenhaCardProps) {
       case "proprietario": return "PR";
       case "check-in": return "CI";
       case "check-out": return "CO";
+      case "hospede": return "H";
       default: return "N";
     }
   };
@@ -30,6 +31,7 @@ export default function SenhaCard({ senha }: SenhaCardProps) {
       case "proprietario": return "Proprietário";
       case "check-in": return "Check-in";
       case "check-out": return "Check-out";
+      case "hospede": return "Hóspede";
       default: return "Normal";
     }
   };
