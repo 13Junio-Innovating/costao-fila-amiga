@@ -26,7 +26,8 @@ const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
-  <DrawerPortal>
+  // Temporariamente removido DrawerPortal para debug do erro removeChild
+  <>
     <DrawerOverlay />
     <DrawerPrimitive.Content
       ref={ref}
@@ -39,7 +40,7 @@ const DrawerContent = React.forwardRef<
       <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
       {children}
     </DrawerPrimitive.Content>
-  </DrawerPortal>
+  </>
 ));
 DrawerContent.displayName = "DrawerContent";
 
