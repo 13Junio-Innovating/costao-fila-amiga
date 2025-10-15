@@ -1,17 +1,23 @@
 import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Monitor, BarChart3, LogOut, Settings } from "lucide-react";
+import { Home, Monitor, BarChart3, LogOut, Settings, Sun, Moon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
 
 interface LayoutProps {
   children: ReactNode;
+  showAdminLink?: boolean;
+  showPainelLink?: boolean;
+  showRelatoriosLink?: boolean;
+  showThemeToggle?: boolean;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, showAdminLink = true, showPainelLink = true, showRelatoriosLink = true, showThemeToggle = false }: LayoutProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { resolvedTheme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -47,27 +53,47 @@ export default function Layout({ children }: LayoutProps) {
                     Início
                   </Button>
                 </Link>
-                <Link to="/admin">
-                  <Button variant="ghost" size="sm">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Administração
-                  </Button>
-                </Link>
-                <Link to="/painel">
-                  <Button variant="ghost" size="sm">
-                    <Monitor className="w-4 h-4 mr-2" />
-                    Painel
-                  </Button>
-                </Link>
-                <Link to="/relatorios">
-                  <Button variant="ghost" size="sm">
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Relatórios
-                  </Button>
-                </Link>
+                {showAdminLink && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="sm">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Administração
+                    </Button>
+                  </Link>
+                )}
+                {showPainelLink && (
+                  <Link to="/painel">
+                    <Button variant="ghost" size="sm">
+                      <Monitor className="w-4 h-4 mr-2" />
+                      Painel
+                    </Button>
+                  </Link>
+                )}
+                {showRelatoriosLink && (
+                  <Link to="/relatorios">
+                    <Button variant="ghost" size="sm">
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Relatórios
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
+              {showThemeToggle && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label="Alternar tema"
+                  onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                >
+                  {resolvedTheme === "dark" ? (
+                    <Sun className="w-4 h-4" />
+                  ) : (
+                    <Moon className="w-4 h-4" />
+                  )}
+                </Button>
+              )}
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Sair

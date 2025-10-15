@@ -306,7 +306,7 @@ export default function Relatorios() {
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={120} label>
+                    <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={120} isAnimationActive={false} label={false} labelLine={false}>
                       {pieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={TYPE_COLORS[entry.tipo] || "#94a3b8"} />
                       ))}
