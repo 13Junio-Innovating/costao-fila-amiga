@@ -103,7 +103,7 @@ export default function Home() {
         .numero{font-size:48px; font-weight:bold; color:hsl(192 85% 42%); margin:20px 0}
       </style></head><body>
       <div class="ticket">
-        <div>Resort Costão do Santinho</div>
+        <div>Resort Costao do Santinho</div>
         <div>${nome}</div>
         <div class="numero">${numero}</div>
         <div>Aguarde ser chamado</div>
@@ -144,7 +144,7 @@ export default function Home() {
           src="https://www.youtube.com/embed/_TUU487uR38?autoplay=1&mute=1&loop=1&playlist=_TUU487uR38&start=35&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
           allow="autoplay; encrypted-media"
           frameBorder="0"
-          title="Tour Virtual Costão do Santinho"
+          title="Tour Virtual Costao do Santinho"
         />
         <div className="absolute inset-0 bg-black/40" />
       </div>
@@ -156,8 +156,7 @@ export default function Home() {
               <img src={import.meta.env.VITE_LOGO_URL} alt="Logo" className="h-14 w-auto" />
             </div>
           )}
-          <h1 className="text-5xl font-bold text-white mb-4">Resort Costão do Santinho</h1>
-          <p className="text-xl text-white/90">Sistema de Chamadas</p>
+          <h1 className="text-5xl font-bold text-white mb-4">Resort Costao do Santinho</h1>
         </div>
 
         {!novaSenha ? (
